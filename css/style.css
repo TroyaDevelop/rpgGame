@@ -1,0 +1,18 @@
+.player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 0 25px 0;
+}
+
+.fight {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 25px 0;
+}
+
+.enemy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}/*# sourceMappingURL=style.css.map */
