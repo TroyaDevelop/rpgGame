@@ -1,3 +1,12 @@
+const enemyPool = [
+    {
+        name: "Манекен",
+        hp: 10,
+        armor: 0,
+        power: 0,
+    },
+]
+
 const player = {
     hp: 100,
     armor: 0,
@@ -6,9 +15,9 @@ const player = {
 }
 
 const enemy = {
-    hp: 10,
-    armor: 0,
-    power: 0,
+    hp: null,
+    armor: null,
+    power: null,
 };
 
 const fight = {
@@ -17,6 +26,10 @@ const fight = {
     turn: 1,
     
     init(){
+        this.methodsInit();
+    },
+
+    methodsInit(){
         document.querySelector(".fight").addEventListener("click", event => {
             if(event.target.className !== "fight__start"){
                 return;
@@ -25,22 +38,32 @@ const fight = {
                 this.fightInit();
             };
         });
-    },
-
-    fightInit(){
         document.querySelector(".fight").addEventListener("click", event =>{
             if(event.target.className !== "fight__attack"){
                 return;
             }
             this.attack(event);
         });
+        document.querySelector(".fight").addEventListener("click", event =>{
+            if(event.target.className !== "fight__endTurn"){
+                return;
+            }
+            this.endTurn(event);
+        });
+    },
+
+    fightInit(){
+        this.turn = 1;
+        this.enemyInit();
         this.createDamageInfo();
         this.updateTurnInfo();
         this.createAttackButton();
     },
 
-    run(){
-        this.init();
+    enemyInit(){
+        this.enemy.hp = enemyPool[0].hp;
+        this.enemy.armor = enemyPool[0].armor;
+        this.enemy.power = enemyPool[0].power;
     },
 
     endTurn(){
@@ -147,12 +170,6 @@ const fight = {
         endTurn.textContent = "Закончить ход";
         endTurn.classList.add("fight__endTurn");
         fightDiv.appendChild(endTurn);
-        document.querySelector(".fight").addEventListener("click", event =>{
-            if(event.target.className !== "fight__endTurn" || this.turn === 1){
-                return;
-            }
-            this.endTurn(event);
-        });
         return fightDiv;
     },
 
@@ -183,4 +200,5 @@ const fight = {
     },
 };
 
-fight.run();
+fight.init();
+console.log(enemyPool[0]);
