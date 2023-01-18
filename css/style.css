@@ -7,8 +7,13 @@
 
 .fight {
   display: flex;
-  justify-content: center;
-  margin: 0 0 25px 0;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 0 15px 0;
+}
+
+.fight__controls {
+  display: flex;
 }
 
 .enemy {

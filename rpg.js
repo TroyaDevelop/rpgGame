@@ -14,13 +14,14 @@ const enemy = {
 const fight = {
     player,
     enemy,
+    turn: 1,
     
     init(){
         document.querySelector(".fight").addEventListener("click", event => {
             if(event.target.className !== "fight__start"){
                 return;
             } else {
-                this.deleteStartFightButton();
+                this.clearFightDiv();
                 this.fightInit();
             };
         });
@@ -33,52 +34,92 @@ const fight = {
             }
             this.attack(event);
         });
-        this.createAttackButton();
         this.createDamageInfo();
+        this.updateTurnInfo();
+        this.createAttackButton();
     },
 
     run(){
         this.init();
     },
 
+    endTurn(){
+        this.enemyAttack();
+        this.changeTurn();
+        this.updateTurnInfo();
+        this.createAttackButton();
+        this.deleteEndTurnButton();
+    },
+
     attack(event){
-        let damage = Math.floor(Math.random() * 3) + 1;
-        if (this.enemy.hp <= 0){
-            return;
-        }
-        this.enemy.hp = this.enemy.hp - damage;
-        if(this.enemy.hp < 0){
-            this.enemy.hp = 0;
-        }
-        this.updateStatus(damage);
-        if(this.enemy.hp === 0){
+        this.playerAttack();
+        this.changeTurn();
+        this.updateTurnInfo();
+        this.deleteAttackButton();
+        this.createEndTurnButton();
+        if(this.enemy.hp === 0 || this.player.hp === 0){
             this.endFight();
         }
     },
 
-    updateStatus(damage){
+    playerAttack(){
+        let playerDamage = Math.floor(Math.random() * 3) + 1; //Переделать. Урон должен быть от силы игрока.
+        this.enemy.hp = this.enemy.hp - playerDamage;
+        if(this.enemy.hp < 0){
+            this.enemy.hp = 0;
+        }
+
+        this.updateStatus();
+        this.updateDamageCount(playerDamage);
+    },
+
+    enemyAttack(){
+        let enemyDamage = 0;
+        this.player.hp = this.player.hp - enemyDamage;
+        if(this.player.hp < 0){
+            this.player.hp = 0;
+        }
+        this.updateStatus();
+        this.updateDamageCount(enemyDamage);
+    },
+
+    changeTurn(){
+        if(this.turn === 1){
+            this.turn = 2;
+        } else if(this.turn === 2){
+            this.turn = 1;
+        };
+    },
+
+    updateStatus(){
         document.getElementById("player__hp").innerHTML = this.player.hp;
-        document.getElementById("player__armor").innerHTML = this.player.armor;
-        document.getElementById("player__power").innerHTML = this.player.power;
         document.getElementById("enemy__hp").innerHTML = this.enemy.hp;
-        document.getElementById("damageCount").innerHTML = (`${damage} урона`);
+    },
+
+    updateDamageCount(damage){
+        if (this.turn === 1){
+            document.getElementById("damageCount").innerHTML = (`Вы нанесли: ${damage} урона.`);
+        } else if(this.turn === 2){
+            document.getElementById("damageCount").innerHTML = (`Противник нанёс: ${damage} урона`);
+            };
+        },
+
+    updateTurnInfo(){
+        if(this.turn == 1){
+            document.getElementById("currentTurn").innerHTML = ("Ход игрока");
+        } else if(this.turn == 2){
+            document.getElementById("currentTurn").innerHTML = ("Ход противника");
+        }
     },
 
     createDamageInfo(){
         let fightDiv = document.querySelector(".fight");
-        let damageInfo = document.createElement('p');
-        damageInfo.textContent = "Вы нанесли: ";
-        fightDiv.appendChild(damageInfo);
-        let damageInfo2 = document.createElement('span');
-        damageInfo2.id = "damageCount";
-        damageInfo.appendChild(damageInfo2);
-        return fightDiv;
-    },
-
-    deleteDamageInfo(){
-        let fightDiv = document.querySelector(".fight");
-        fightDiv.innerHTML = "";
-
+        let damageCount = document.createElement('p');
+        damageCount.id = "damageCount";
+        fightDiv.appendChild(damageCount);
+        let turn = document.createElement('p');
+        turn.id = "currentTurn";
+        fightDiv.appendChild(turn);
         return fightDiv;
     },
 
@@ -91,34 +132,55 @@ const fight = {
         return fightDiv;
     },
 
-    deleteStartFightButton(){
+    createAttackButton(){
         let fightDiv = document.querySelector(".fight");
-        let startBtn = document.querySelector(".fight__start");
-        startBtn.remove();
+        let attackBtn = document.createElement('button');
+        attackBtn.textContent = "Атаковать";
+        attackBtn.classList.add("fight__attack");
+        fightDiv.appendChild(attackBtn);
         return fightDiv;
     },
 
-    createAttackButton(){
+    createEndTurnButton(){
         let fightDiv = document.querySelector(".fight");
-        let damageInfo = document.createElement('button');
-        damageInfo.textContent = "Атаковать";
-        damageInfo.classList.add("fight__attack");
-        fightDiv.appendChild(damageInfo);
+        let endTurn = document.createElement('button');
+        endTurn.textContent = "Закончить ход";
+        endTurn.classList.add("fight__endTurn");
+        fightDiv.appendChild(endTurn);
+        document.querySelector(".fight").addEventListener("click", event =>{
+            if(event.target.className !== "fight__endTurn" || this.turn === 1){
+                return;
+            }
+            this.endTurn(event);
+        });
         return fightDiv;
     },
 
     deleteAttackButton(){
         let fightDiv = document.querySelector(".fight");
-        let attackBtn = document.querySelector(".fight__attack");
-        attackBtn.remove();
+        let damageInfo = document.querySelector(".fight__attack");
+        damageInfo.remove();
+        return fightDiv;
+    },
+
+    deleteEndTurnButton(){
+        let fightDiv = document.querySelector(".fight");
+        let endTurn = document.querySelector(".fight__endTurn");
+        endTurn.remove();
+        return fightDiv;
+    },
+
+    clearFightDiv(){
+        let fightDiv = document.querySelector(".fight");
+        fightDiv.innerHTML = "";
+
         return fightDiv;
     },
 
     endFight(){
-        this.deleteAttackButton();
-        this.deleteDamageInfo();
+        this.clearFightDiv();
         this.createStartFightButton();
-    }
+    },
 };
 
 fight.run();
