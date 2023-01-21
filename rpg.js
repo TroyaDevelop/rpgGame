@@ -5,6 +5,20 @@ const enemyPool = [
         armor: 0,
         power: 0,
     },
+
+    {
+        name: "Ислам",
+        hp: 20,
+        armor: 0,
+        power: 3,
+    },
+
+    {
+        name: "Лерочка",
+        hp: 1000,
+        armor: 0,
+        power: 10,
+    },
 ]
 
 const player = {
@@ -15,20 +29,69 @@ const player = {
 }
 
 const enemy = {
+    name: null,
     hp: null,
     armor: null,
     power: null,
+};
+
+const inv = {
+    player,
+    inventory: ['Зелье здоровья'],
+    invElement: null,
+
+    init(){
+        this.invElement = document.querySelector(".inv");
+        this.player.hp = localStorage.getItem("playerHp");
+        this.player.hp = parseInt(this.player.hp);
+        this.methodsInit();
+        fight.updatePlayerStatus();
+        this.initInvList();
+    },
+
+    methodsInit(){
+        document.querySelector(".inv").addEventListener("click", event => {
+            if(event.target.id !== "item"){
+                return;
+            } else {
+                this.healthPotion();
+            };
+        });
+    },
+
+    initInvList(){
+        let invDiv = this.invElement;
+        for(let i = 0; i < this.inventory.length; i++){
+            let item  = document.createElement('a');
+            item.id = "item";
+            item.href = "#";
+            item.textContent = this.inventory[i];
+            invDiv.appendChild(item);
+        }
+    },
+    healthPotion(){
+        this.player.hp += 30;
+        localStorage.setItem('playerHp', this.player.hp);
+        fight.updatePlayerStatus();
+        },
 };
 
 const fight = {
     player,
     enemy,
     turn: 1,
+    fightElement: null,
     
+    //Инициализация страницы
     init(){
+        this.fightElement = document.querySelector(".fight");
         this.methodsInit();
+        this.player.hp = localStorage.getItem('playerHp');
+        this.player.hp = parseInt(this.player.hp);
+        this.updateStatus();
     },
 
+    //Инициализирует события
     methodsInit(){
         document.querySelector(".fight").addEventListener("click", event => {
             if(event.target.className !== "fight__start"){
@@ -52,18 +115,22 @@ const fight = {
         });
     },
 
+    //Инициализирует экран боя
     fightInit(){
         this.turn = 1;
         this.enemyInit();
         this.createDamageInfo();
-        this.updateTurnInfo();
         this.createAttackButton();
+        this.updateStatus();
+        this.updateTurnInfo();
     },
 
     enemyInit(){
-        this.enemy.hp = enemyPool[0].hp;
-        this.enemy.armor = enemyPool[0].armor;
-        this.enemy.power = enemyPool[0].power;
+        // Object.assign(this.enemy, enemyPool[0]); // Способ копировать свойства объекта из одного в другой. Оставлю до лучших времен.
+        this.enemy.name = enemyPool[2].name;
+        this.enemy.hp = enemyPool[2].hp;
+        this.enemy.armor = enemyPool[2].armor;
+        this.enemy.power = enemyPool[2].power;
     },
 
     endTurn(){
@@ -97,11 +164,12 @@ const fight = {
     },
 
     enemyAttack(){
-        let enemyDamage = 0;
+        let enemyDamage = this.enemy.power;
         this.player.hp = this.player.hp - enemyDamage;
         if(this.player.hp < 0){
             this.player.hp = 0;
         }
+        localStorage.setItem('playerHp', this.player.hp);
         this.updateStatus();
         this.updateDamageCount(enemyDamage);
     },
@@ -114,8 +182,16 @@ const fight = {
         };
     },
 
-    updateStatus(){
+    updatePlayerStatus(){
+        if(this.player.hp > 100){
+            this.player.hp = 100;
+        }
         document.getElementById("player__hp").innerHTML = this.player.hp;
+    },
+
+    updateStatus(){
+        this.updatePlayerStatus();
+        document.getElementById("enemy__name").innerHTML = this.enemy.name;
         document.getElementById("enemy__hp").innerHTML = this.enemy.hp;
     },
 
@@ -136,7 +212,7 @@ const fight = {
     },
 
     createDamageInfo(){
-        let fightDiv = document.querySelector(".fight");
+        let fightDiv = this.fightElement;
         let damageCount = document.createElement('p');
         damageCount.id = "damageCount";
         fightDiv.appendChild(damageCount);
@@ -147,7 +223,7 @@ const fight = {
     },
 
     createStartFightButton(){
-        let fightDiv = document.querySelector(".fight");
+        let fightDiv = this.fightElement;
         let startBtn = document.createElement('button');
         startBtn.textContent = "Начать бой";
         startBtn.classList.add("fight__start");
@@ -156,7 +232,7 @@ const fight = {
     },
 
     createAttackButton(){
-        let fightDiv = document.querySelector(".fight");
+        let fightDiv = this.fightElement;
         let attackBtn = document.createElement('button');
         attackBtn.textContent = "Атаковать";
         attackBtn.classList.add("fight__attack");
@@ -165,7 +241,7 @@ const fight = {
     },
 
     createEndTurnButton(){
-        let fightDiv = document.querySelector(".fight");
+        let fightDiv = this.fightElement;
         let endTurn = document.createElement('button');
         endTurn.textContent = "Закончить ход";
         endTurn.classList.add("fight__endTurn");
@@ -174,31 +250,28 @@ const fight = {
     },
 
     deleteAttackButton(){
-        let fightDiv = document.querySelector(".fight");
+        let fightDiv = this.fightElement;
         let damageInfo = document.querySelector(".fight__attack");
         damageInfo.remove();
         return fightDiv;
     },
 
     deleteEndTurnButton(){
-        let fightDiv = document.querySelector(".fight");
+        let fightDiv = this.fightElement;
         let endTurn = document.querySelector(".fight__endTurn");
         endTurn.remove();
         return fightDiv;
     },
 
     clearFightDiv(){
-        let fightDiv = document.querySelector(".fight");
+        let fightDiv = this.fightElement;
         fightDiv.innerHTML = "";
 
         return fightDiv;
     },
-
+//Конец боя
     endFight(){
         this.clearFightDiv();
         this.createStartFightButton();
     },
 };
-
-fight.init();
-console.log(enemyPool[0]);
