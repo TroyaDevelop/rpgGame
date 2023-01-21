@@ -35,6 +35,14 @@ const enemy = {
     power: null,
 };
 
+const game = {
+    player,
+    
+    init(){
+        localStorage.setItem('playerHp', this.player.hp);
+    },
+};
+
 const inv = {
     player,
     inventory: ['Зелье здоровья'],
